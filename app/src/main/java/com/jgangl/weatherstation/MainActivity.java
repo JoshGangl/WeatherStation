@@ -19,36 +19,71 @@ import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
-    //Test Commit 2
-
-
     private DatabaseReference mDatabase;
 
     private TextView tempTextView;
+    private TextView humidTextView;
+    private TextView pressTextView;
 
-    private int currentTemp;
-    private int currentHum;
-    private int currentPress;
+    private double currentTemp;//Celsius
+    private double currentHum;
+    private double currentPress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Toolbar toolbar = findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
 
         tempTextView = findViewById(R.id.tempTextView);
+        humidTextView = findViewById(R.id.humidTextView);
+        pressTextView = findViewById(R.id.pressTextView);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        ValueEventListener dataListener = new ValueEventListener() {
+        ValueEventListener temperatureListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
+                if(dataSnapshot.getValue() != null){
+                    //Temperature comes as a 4 digit # ("4650" = 46.50 degrees Celsius)
+                    currentTemp = dataToCelsius(Integer.parseInt(dataSnapshot.getValue().toString()));
 
-                String text = dataSnapshot.getValue() + "°";
-                tempTextView.setText(text);
-                Log.d("Firebase DataChange", text);
+                    tempTextView.setText(String.valueOf(currentTemp));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w("Firebase Error", "loadPost:onCancelled", databaseError.toException());
+            }
+        };
+
+        ValueEventListener humidityListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Get Post object and use the values to update the UI
+                if(dataSnapshot.getValue() != null){
+                    currentHum = dataToHumidity(Integer.parseInt(dataSnapshot.getValue().toString()));
+                    humidTextView.setText(String.valueOf(currentHum));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w("Firebase Error", "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        };
+        ValueEventListener pressureListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Get Post object and use the values to update the UI
+                if(dataSnapshot.getValue() != null){
+                    currentPress = dataToPascals(Integer.parseInt(dataSnapshot.getValue().toString()));
+                    pressTextView.setText(String.valueOf(pascalsToMercury(currentPress)));
+                }
             }
 
             @Override
@@ -59,7 +94,9 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mDatabase.child("Temperature").addValueEventListener(dataListener);
+        mDatabase.child("Temperature").addValueEventListener(temperatureListener);
+        mDatabase.child("Humidity").addValueEventListener(humidityListener);
+        mDatabase.child("Pressure").addValueEventListener(pressureListener);
     }
 
     @Override
@@ -82,5 +119,32 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    //Convert Celsius to Fahrenheit
+    //Returns Temperature in Fahrenheit
+    private double celsiusToFahrenheit(double celsius){
+        return (celsius * 1.8) + 32;
+    }
+
+    //Returns Temperature in Celsius
+    private double dataToCelsius(int data){
+        return data / 100.0;
+    }
+
+    //Returns Pressure in Pa (Pascals)
+    private double dataToPascals(int data){
+        return data / 256.0;
+    }
+
+    //Convert Pa to inHg
+    //Returns Pressure in inHg
+    private double pascalsToMercury(double pascals){
+        return pascals / 3386.389;
+    }
+
+    //Returns %RH (Relative Humidity)
+    private double dataToHumidity(int data){
+        return data / 1024.0;
     }
 }
