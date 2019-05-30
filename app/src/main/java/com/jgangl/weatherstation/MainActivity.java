@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -20,23 +21,20 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabase;
 
+    private TextView tempTextView;
+
+    private int currentTemp;
+    private int currentHum;
+    private int currentPress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDatabase.child("Test4").setValue(10);
-
-                Snackbar.make(view, "Set Value!", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        tempTextView = findViewById(R.id.tempTextView);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -44,8 +42,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
-                int post = dataSnapshot.getValue(int.class);
-                Log.d("Firebase DataChange", Integer.toString(post));
+
+                String text = dataSnapshot.getValue() + "°";
+                tempTextView.setText(text);
+                Log.d("Firebase DataChange", text);
             }
 
             @Override
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mDatabase.child("Test4").addValueEventListener(dataListener);
+        mDatabase.child("Temperature").addValueEventListener(dataListener);
     }
 
     @Override
