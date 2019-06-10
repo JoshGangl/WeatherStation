@@ -17,6 +17,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.DecimalFormat;
+
 public class MainActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabase;
@@ -28,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private double currentTemp;//Celsius
     private double currentHum;
     private double currentPress;
+
+    DecimalFormat precision = new DecimalFormat("0.0");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +50,8 @@ public class MainActivity extends AppCompatActivity {
                 // Get Post object and use the values to update the UI
                 if(dataSnapshot.getValue() != null){
                     //Temperature comes as a 4 digit # ("4650" = 46.50 degrees Celsius)
-                    currentTemp = dataToCelsius(Integer.parseInt(dataSnapshot.getValue().toString()));
-
-                    tempTextView.setText(String.valueOf(currentTemp));
+                    currentTemp = celsiusToFahrenheit(dataToCelsius(Integer.parseInt(dataSnapshot.getValue().toString())));
+                    tempTextView.setText(precision.format(currentTemp));
                 }
             }
 
@@ -65,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 // Get Post object and use the values to update the UI
                 if(dataSnapshot.getValue() != null){
                     currentHum = dataToHumidity(Integer.parseInt(dataSnapshot.getValue().toString()));
-                    humidTextView.setText(String.valueOf(currentHum));
+                    humidTextView.setText(precision.format(currentHum));
                 }
             }
 
@@ -82,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 // Get Post object and use the values to update the UI
                 if(dataSnapshot.getValue() != null){
                     currentPress = dataToPascals(Integer.parseInt(dataSnapshot.getValue().toString()));
-                    pressTextView.setText(String.valueOf(pascalsToMercury(currentPress)));
+                    pressTextView.setText(precision.format(pascalsToMercury(currentPress)));
                 }
             }
 
