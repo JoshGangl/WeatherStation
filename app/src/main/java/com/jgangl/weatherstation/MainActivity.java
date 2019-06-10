@@ -52,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+
         tempTextView = findViewById(R.id.tempTextView);
         humidTextView = findViewById(R.id.humidTextView);
         pressTextView = findViewById(R.id.pressTextView);
@@ -197,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
                 .setContentTitle("Temperature Alert")
                 .setContentText("Temperature High")
                 .setContentIntent(notificationPendingIntent)
+                .setSmallIcon(R.drawable.weather_icon)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setDefaults(NotificationCompat.DEFAULT_ALL);
