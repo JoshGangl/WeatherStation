@@ -6,18 +6,14 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -37,15 +33,38 @@ public class MainActivity extends AppCompatActivity {
     private TextView tempTextView;
     private TextView humidTextView;
     private TextView pressTextView;
+    private TextView tempSymbolTextView;
+    private TextView pressSymbolTextView;
 
     private double currentTemp;//Celsius
     private double currentHum;
     private double currentPress;
 
-    private double highTempThreshold;
-    private double lowTempThreshold;
+    private int highTempThreshold;
+    private int lowTempThreshold;
+
+    private boolean displayFahrenheit;
+    private boolean displayPascals;
+
+    private String tempExtreme;
 
     DecimalFormat precision = new DecimalFormat("0.0");
+
+    private SharedPreferences mPreferences;
+    private String sharedPrefFile =
+            "com.example.android.hellosharedprefs";
+
+    // Key for current value
+    private final String DISPLAY_FAHRENHEIT_KEY = "displayFahrenheit";
+    private final String DISPLAY_PASCALS_KEY = "displayPascals";
+
+    private final String TEMP_HIGH_KEY = "tempHigh";
+    private final String TEMP_LOW_KEY = "tempLow";
+
+    private static final int NOTIFICATION_ID = 0;
+    private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
+
+    private NotificationManager mNotifyManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +74,19 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mPreferences = getSharedPreferences(
+                sharedPrefFile, MODE_PRIVATE);
+
+        displayFahrenheit = mPreferences.getBoolean(DISPLAY_FAHRENHEIT_KEY, displayFahrenheit);
+        displayPascals = mPreferences.getBoolean(DISPLAY_PASCALS_KEY, displayPascals);
+        highTempThreshold = mPreferences.getInt(TEMP_HIGH_KEY, highTempThreshold);
+        lowTempThreshold = mPreferences.getInt(TEMP_LOW_KEY, lowTempThreshold);
 
         tempTextView = findViewById(R.id.tempTextView);
         humidTextView = findViewById(R.id.humidTextView);
         pressTextView = findViewById(R.id.pressTextView);
+        tempSymbolTextView = findViewById(R.id.tempTextViewSymbol);
+        pressSymbolTextView = findViewById(R.id.pressTextViewSymbol);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -69,12 +97,22 @@ public class MainActivity extends AppCompatActivity {
                 if(dataSnapshot.getValue() != null){
                     //Temperature comes as a 4 digit # ("4650" = 46.50 degrees Celsius)
                     currentTemp = celsiusToFahrenheit(dataToCelsius(Integer.parseInt(dataSnapshot.getValue().toString())));
-                    tempTextView.setText(precision.format(currentTemp));
+
+                    if(displayFahrenheit){//Fahrenheit
+                        tempTextView.setText(precision.format(currentTemp));
+                        tempSymbolTextView.setText(getString(R.string.tempFahrenheitSymbol));
+                    }
+                    else{//Celsius
+                        tempTextView.setText(precision.format(fahrenheitToCelsius(currentTemp)));
+                        tempSymbolTextView.setText(getString(R.string.tempCelsiusSymbol));
+                    }
 
                     if(currentTemp >= highTempThreshold){
+                        tempExtreme = "high";
                         sendNotification();
                     }
                     else if(currentTemp <= lowTempThreshold){
+                        tempExtreme = "low";
                         sendNotification();
                     }
                 }
@@ -109,7 +147,17 @@ public class MainActivity extends AppCompatActivity {
                 // Get Post object and use the values to update the UI
                 if(dataSnapshot.getValue() != null){
                     currentPress = dataToPascals(Integer.parseInt(dataSnapshot.getValue().toString()));
-                    pressTextView.setText(precision.format(pascalsToMercury(currentPress)));
+
+                    if(displayPascals){//Pascals
+                        pressTextView.setText(precision.format(currentPress));
+                        pressTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50);
+                        pressSymbolTextView.setText(getString(R.string.pressPascalsSymbol));
+                    }
+                    else{//inches of mercury
+                        pressTextView.setText(precision.format(pascalsToMercury(currentPress)));
+                        pressTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 100);
+                        pressSymbolTextView.setText(getString(R.string.pressMercurySymbol));
+                    }
                 }
             }
 
@@ -126,8 +174,6 @@ public class MainActivity extends AppCompatActivity {
         mDatabase.child("Pressure").addValueEventListener(pressureListener);
 
         createNotificationChannel();
-
-        sendNotification();
     }
 
     @Override
@@ -146,19 +192,14 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this,
+                    SettingsActivity.class);
+            startActivity(settingsIntent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
-
-
-    private static final int NOTIFICATION_ID = 0;
-    private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
-    private static final String ACTION_UPDATE_NOTIFICATION =
-            "com.jgangl.notifyme.ACTION_UPDATE_NOTIFICATION";
-
-    private NotificationManager mNotifyManager;
 
     public void createNotificationChannel() {
         mNotifyManager = (NotificationManager)
@@ -167,28 +208,21 @@ public class MainActivity extends AppCompatActivity {
         if (android.os.Build.VERSION.SDK_INT >=
                 android.os.Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel(PRIMARY_CHANNEL_ID,
-                    "Mascot Notification", NotificationManager
+                    "WeatherStation Notification", NotificationManager
                     .IMPORTANCE_HIGH);
             notificationChannel.enableLights(true);
             notificationChannel.setLightColor(Color.RED);
             notificationChannel.enableVibration(true);
-            notificationChannel.setDescription("Notification from Mascot");
+            notificationChannel.setDescription("Notification from Weather station");
 
             mNotifyManager.createNotificationChannel(notificationChannel);
         }
     }
 
     public void sendNotification() {
-        //Intent updateIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
-        //PendingIntent updatePendingIntent = PendingIntent.getBroadcast
-        //        (this, NOTIFICATION_ID, updateIntent, PendingIntent.FLAG_ONE_SHOT);
-
         NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
 
-        //notifyBuilder.addAction(R.drawable.ic_update, "Update Notification", updatePendingIntent);
-
         mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
-
     }
 
     private NotificationCompat.Builder getNotificationBuilder(){
@@ -199,9 +233,9 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, PRIMARY_CHANNEL_ID)
                 .setContentTitle("Temperature Alert")
-                .setContentText("Temperature High")
+                .setContentText("Temperature " + tempExtreme)
                 .setContentIntent(notificationPendingIntent)
-                .setSmallIcon(R.drawable.weather_icon)
+                .setSmallIcon(R.drawable.ic_whatshot_24dp)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setDefaults(NotificationCompat.DEFAULT_ALL);
@@ -212,6 +246,11 @@ public class MainActivity extends AppCompatActivity {
     //Returns Temperature in Fahrenheit
     private double celsiusToFahrenheit(double celsius){
         return (celsius * 1.8) + 32;
+    }
+
+    //Convert Fahrenheit to Celsius
+    private double fahrenheitToCelsius(double fahrenheit){
+        return (fahrenheit - 32) * 5/9;
     }
 
     //Returns Temperature in Celsius

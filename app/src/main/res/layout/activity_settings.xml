@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/tempSetting"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tempSettingText"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/fahrenheit"
+            android:textSize="20sp"
+            android:textColor="@color/colorText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Switch
+            android:id="@+id/tempSettingSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:checked="true"
+            app:layout_constraintStart_toEndOf="@+id/tempSettingText"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pressSetting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="@id/tempSetting"
+        app:layout_constraintTop_toBottomOf="@+id/tempSetting">
+
+        <TextView
+            android:id="@+id/pressSettingText"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/pascals"
+            android:textSize="20sp"
+            android:textColor="@color/colorText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Switch
+            android:id="@+id/pressSettingSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:checked="true"
+            app:layout_constraintStart_toEndOf="@+id/pressSettingText"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/tempHighThresholdSetting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="@id/pressSetting"
+        app:layout_constraintTop_toBottomOf="@+id/pressSetting">
+
+        <TextView
+            android:id="@+id/tempHighSettingText"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/temperature_high"
+            android:textSize="20sp"
+            android:textColor="@color/colorText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/tempHighSettingEditText"
+            android:inputType="number"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:checked="true"
+            android:textColor="@color/colorText"
+            app:layout_constraintStart_toEndOf="@+id/pressSettingText"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/tempLowThresholdSetting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="@id/tempHighThresholdSetting"
+        app:layout_constraintTop_toBottomOf="@+id/tempHighThresholdSetting">
+
+        <TextView
+            android:id="@+id/tempLowSettingText"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/temperature_low"
+            android:textSize="20sp"
+            android:textColor="@color/colorText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/tempLowSettingEditText"
+            android:inputType="number"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:checked="true"
+            android:textColor="@color/colorText"
+            app:layout_constraintStart_toEndOf="@+id/pressSettingText"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

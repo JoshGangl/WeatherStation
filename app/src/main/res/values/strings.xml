@@ -4,8 +4,14 @@
     <string name="tempText">0</string>
     <string name="humidText">0</string>
     <string name="pressText">0</string>
-    <string name="tempSymbol">°</string>
+    <string name="tempFahrenheitSymbol">°F</string>
+    <string name="tempCelsiusSymbol">°C</string>
     <string name="pressPascalsSymbol">hPa</string>
     <string name="pressMercurySymbol">inHg</string>
     <string name="humidSymbol">%RH</string>
+    <string name="fahrenheit">Fahrenheit</string>
+    <string name="pascals">Pascals</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="temperature_high">Temperature High</string>
+    <string name="temperature_low">Temperature Low</string>
 </resources>
